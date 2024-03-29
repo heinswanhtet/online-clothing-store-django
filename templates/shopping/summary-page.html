@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="table-responsive text-nowrap">
+        <h2>Order Summary</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order_item in order.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{{ order_item.item.get_absolute_url }}">{{ order_item.item.title }}</a></td>
+                    <td>$
+                        {% if order_item.item.discount_price %}
+                        {{ order_item.item.discount_price }}
+                        <span class="badge badge-secondary">Original ${{ order_item.item.price }}</span>
+                        {% else %}
+                        {{ order_item.calculate_total_price }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ order_item.item.decrease_quantity }}">
+                            <i class="fas fa-minus mr-2"></i>
+                        </a>
+                        {{ order_item.quantity }}
+                        <a href="{{ order_item.item.increase_quantity }}">
+                            <i class="fas fa-plus ml-2"></i>
+                        </a>
+                    </td>
+                    <td>
+                        $
+                        {% if order_item.item.discount_price %}
+                        {{ order_item.calculate_total_discount_price }}
+                        <span class="badge badge-primary">Saving ${{ order_item.calculate_amount_saved }}</span>
+                        {% else %}
+                        {{ order_item.calculate_total_price }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ order_item.item.remove_item }}">
+                            <i style="color:red;" class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td style="text-align: center;" colspan="5"><b>Your cart is empty.</b></td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <a class="btn btn-primary float-right" href="{% url 'mysite:home' %}">Continue Shopping</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if order.coupon %}
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="text-success"><b>Promo Code</b></td>
+                    <td class="text-success">-${{ order.coupon.amount }}</td>
+                </tr>
+                {% endif %}
+                {% if order.calculate_order_total %}
+                <tr>
+                    <td colspan="3"></td>
+                    <td><b>Order Total</b></td>
+                    <td>${{ order.calculate_order_total }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <a class="btn btn-warning float-right ml-2" href="{% url 'mysite:checkout' %}">Proceed to
+                            checkout</a>
+                        <a class="btn btn-primary float-right" href="{% url 'mysite:home' %}">Continue Shopping</a>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content %}
